@@ -57,25 +57,25 @@ const Demo = () => {
     });
   }, []);
 
-  const handleStart = () => {
-    // Step 1: Start WebRTC
-    simliClient.start();
-    setStartWebRTC(true);
-    setIsLoading(true);
+  const handleStart = async () => {
+    try {
+      const SimliConfig = {
+        apiKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY as string,
+        faceID: process.env.NEXT_PUBLIC_SIMLI_FACE_ID as string,
+        handleSilence: true,
+        videoRef: videoRef,
+        audioRef: audioRef,
+        maxSessionLength: 3600, // Maximum session length in seconds (e.g., 1 hour)
+        maxIdleTime: 300,      // Maximum idle time in seconds (e.g., 5 minutes)
+      };
 
-    setTimeout(() => {
-      // Step 2: Send empty audio data to WebRTC to start rendering
-      const audioData = new Uint8Array(6000).fill(0);
-      simliClient.sendAudioData(audioData);
-    }, 4000);
+      simliClient.Initialize(SimliConfig);
 
-    audioContext.current = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    return () => {
-      if (audioContext.current) {
-        audioContext.current.close();
-      }
-    };
+      console.log("Simli Client initialized");
+    } catch (error) {
+      console.error("Error initializing Simli Client:", error);
+      setError("Failed to initialize video chat");
+    }
   };
 
   const copyToClipboard = async () => {
